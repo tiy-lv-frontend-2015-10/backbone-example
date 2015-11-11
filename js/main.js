@@ -1,11 +1,3 @@
-$.ajaxSetup({
-  headers: {
-    'X-Parse-Application-Id': 'fPIAO5E3YKUXkP8gP9yOK07f65KOiZlrpkdI8jK6',
-    'X-Parse-REST-API-Key': 'LtIQAEjxEXvVkhYyKI6Xb4w1KloLhnVUS3uhzJys'
-  }
-});
-
-
 var Song = Backbone.Model.extend({
   initialize: function () {
     console.log("A new song has been created");
@@ -36,37 +28,65 @@ var Song = Backbone.Model.extend({
       return "Published Year should be a number";
     }
   },
-  _parse_class_name: "Song"
+  _parse_class_name: "Song",
+  idAttribute: "objectId"
 });
 
-var song = new Song({
-  title: "Für Elise",
-  artist: "Beethoven",
-  publishYear: 1810
-})
-
-var Songs = Backbone.Collection.extend({
-  model: Song,
-  _parse_class_name: "Song"
-});
-
-var SongsCollection = new Songs();
-
-song.save(null, {
-  success: function(resp) {
-    console.log(resp)
-
-    SongsCollection.fetch({
-      success: function(resp) {
-        console.log("success: ", resp);
-      }, error: function (err) {
-        console.log("error: ", err);
-      }
-    })
+var Router = Backbone.Router.extend({
+  initialize: function () {
+    Backbone.history.start({pushState: true});
   },
-  error: function (err) {
-    console.log(err)
+  routes: {
+    "help": "help",
+    "contact": "contact",
+    "contact/phone": "phone",
+    "about":"about",
+    "faq":"faq",
+    "song/:objectId":"song",
+    "": "index"
   }
+});
+
+var router = new Router();
+
+router.on('route:song', function(objectId) {
+  var song = new Song({objectId: objectId});
+  song.fetch();
+  console.log(song);
+});
+
+router.on('route:help', function (){
+  console.log("help page");
+});
+
+router.on('route:contact', function () {
+  console.log('contact page');
+  $("a").css({color:"black"});
+});
+
+router.on('route:phone', function () {
+  console.log('phone page');
+});
+
+router.on('route:about', function () {
+  console.log('about page');
+});
+
+router.on('route:faq', function () {
+  console.log('faq page');
+});
+
+router.on('route:index', function () {
+  console.log('home page');
+});
+
+
+
+$("a").on('click', function(e){
+  e.preventDefault();
+  var href = $(this).attr('href');
+  href = href.substr(1);
+  router.navigate(href, {trigger:true});
 });
 
 
